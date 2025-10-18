@@ -73,6 +73,15 @@ obj <- function(schedule, trees, params, model_cache) {
     trees$tpa <- trees$tpa * (1 - cut_per_step[i])
     # stocking modified by survival rate to account for mortality
     trees$ba <- sum(.005454 * (trees$dbh ^ 2) * trees$tpa * trees$cumsurv)
+
+    ############################################################################
+    # Override mortality to prevent growth over a-line #########################
+    if (trees$ba[1] > 150) {
+      trees$cumsurv <- 150 / (.005454 * (trees$dbh ^ 2) * trees$tpa)
+      trees$ba <- 150
+    }
+    ############################################################################
+
     # BAL is (on average) half of BA minus BA of a single tree
     trees$bal <- (trees$ba - (.005454 * (trees$dbh ^ 2))) / 2
 

@@ -23,8 +23,13 @@ obj <- function(schedule, trees, params, model_cache) {
   all_cut <- F
   for (x in 1:length(schedule)) {
     if (all_cut) schedule[x] <- 0
-    if (schedule[x] > .999) all_cut <- T
+    if (schedule[x] > .95) all_cut <- T
   }
+
+  # schedule > .95 means cut all
+  # schedule < .05 means cut none
+  schedule[schedule > .95] <- 1
+  schedule[schedule < .05] <- 0
 
   # translate cutting schedule to steps (typically 5 yr steps, 15 yr cutting
   # cycle, but defined in params)
@@ -37,8 +42,8 @@ obj <- function(schedule, trees, params, model_cache) {
   trees$sustainable <- TRUE # to track if growth rates are sustainable
 
   # rotation length forshortened if all trees cut early
-  if (any(cut_per_step > .999)) {
-    true_endyr <- (which(cut_per_step > .999) - 1) * params$steplength
+  if (any(cut_per_step > .95)) {
+    true_endyr <- (which(cut_per_step > .95) - 1) * params$steplength
   } else {
     true_endyr <- params$endyr
   }
@@ -69,7 +74,7 @@ obj <- function(schedule, trees, params, model_cache) {
     # stocking modified by survival rate to account for mortality
     trees$ba <- sum(.005454 * (trees$dbh ^ 2) * trees$tpa * trees$cumsurv)
     # BAL is (on average) half of BA minus BA of a single tree
-    trees$bal <- (trees$ba - trees$ba_ac) / 2
+    trees$bal <- (trees$ba - (.005454 * (trees$dbh ^ 2))) / 2
 
     # will dbh growth be sustainable for maple production in this timestep?
     trees$sustainable <-

@@ -69,7 +69,7 @@ postop <- function(pct_cut, trees, params, model_cache) {
     # stocking modified by survival rate to account for mortality
     trees$ba <- sum(.005454 * (trees$dbh ^ 2) * trees$tpa * trees$cumsurv)
     # BAL is (on average) half of BA minus BA of a single tree
-    trees$bal <- (trees$ba - trees$ba_ac) / 2
+    trees$bal <- (trees$ba - (.005454 * (trees$dbh ^ 2))) / 2
 
     # will dbh growth be sustainable for maple production in this timestep?
     trees$sustainable <-
